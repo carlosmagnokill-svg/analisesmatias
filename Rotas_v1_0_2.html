@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matias Intelligence Advisor | Rotas v1.0.2</title>
+<title>Matias Intelligence Advisor | Rotas v1.0.3</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -56,6 +56,15 @@ h1{margin:0;font-size:36px;line-height:1.05;letter-spacing:-.8px}
 .filters{margin-top:0;background:#fff;border-radius:22px;padding:16px;display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1fr auto;gap:12px;box-shadow:var(--shadow)}
 .field label{display:block;font-size:12px;color:#667085;text-transform:uppercase;font-weight:900;letter-spacing:.7px;margin-bottom:7px}
 input,select{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:#fff;color:#111827;font-weight:750;font-size:14px}
+
+.field{position:relative}
+.ac-list{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);background:#1f1f1f;color:#fff;border-radius:14px;
+  box-shadow:0 18px 45px rgba(0,0,0,.35);z-index:80;display:none;max-height:360px;overflow:auto;
+  border:1px solid rgba(255,255,255,.12);padding:6px 0
+}
+.ac-item{padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.ac-item:hover{background:#2d2d2d;color:#f2c94c}
 button.action{border:0;border-radius:999px;background:var(--gold);color:#111;font-weight:900;padding:13px 24px;cursor:pointer;min-width:150px}
 .section-title{margin:26px 0 10px;display:flex;align-items:end;justify-content:space-between}
 .section-title h2{margin:0;font-size:22px}
@@ -115,7 +124,7 @@ tr:hover td{background:#fffdf0}
     <div class="header-main">
       <div class="title-row">
         <h1>Matias Intelligence Advisor</h1>
-        <span class="badge-version">Rotas v1.0.2</span>
+        <span class="badge-version">Rotas v1.0.3</span>
       </div>
       <div class="meta">
         <span>Desenvolvedor: <b>Carlos Magno Kill</b></span>
@@ -253,7 +262,7 @@ tr:hover td{background:#fffdf0}
       <div class="field"><label>Período da tabela</label><select id="clientesRotaPeriod" onchange="handleTablePeriod('clientesRota')"><option value="all">Todo o período</option><option value="6">Últimos 6 meses</option><option value="12">Últimos 12 meses</option><option value="24">Últimos 24 meses</option><option value="year">Ano atual</option><option value="custom">Escolher período</option></select></div>
       <div class="field"><label>Data inicial</label><input id="clientesRotaStart" type="date" onchange="renderTables()"></div>
       <div class="field"><label>Data final</label><input id="clientesRotaEnd" type="date" onchange="renderTables()"></div>
-      <div class="field"><label>Buscar cliente</label><input id="clientesRotaSearch" placeholder="🔎 Cliente" oninput="renderTables()"></div>
+      <div class="field"><label>Buscar cliente</label><input id="clientesRotaSearch" list="clientList" placeholder="🔎 Cliente" oninput="renderTables()"></div>
       <div class="field"><label>Rota</label><input id="clientesRotaRoute" list="routeList" placeholder="🔎 Rota" oninput="renderTables()"></div>
       <div class="field"><label>Classificar por</label><select id="clientesRotaSort" onchange="renderTables()"><option value="receita">Receita</option><option value="envios">Envios</option><option value="ultimo">Último envio</option><option value="cliente">Cliente</option><option value="rota">Rota</option></select></div>
       <div class="field"><label>Ordem</label><select id="clientesRotaOrder" onchange="renderTables()"><option value="desc">Decrescente / Z → A</option><option value="asc">Crescente / A → Z</option></select></div>
@@ -274,9 +283,11 @@ tr:hover td{background:#fffdf0}
       <div class="field"><label>Data final</label><input id="opEnd" type="date" onchange="renderTables()"></div>
       <div class="field"><label>Valor Final maior que</label><input id="opValorMin" placeholder="Ex.: 200,00" oninput="renderTables()"></div>
       <div class="field"><label>OS</label><input id="opOs" placeholder="🔎 Buscar OS" oninput="renderTables()"></div>
-      <div class="field"><label>Cliente</label><input id="opCliente" placeholder="🔎 Buscar cliente" oninput="renderTables()"></div>
+      <div class="field"><label>Cliente</label><input id="opCliente" list="clientList" placeholder="🔎 Buscar cliente" oninput="renderTables()"></div>
       <div class="field"><label>Rota</label><input id="opRota" list="routeList" placeholder="🔎 Buscar rota" oninput="renderTables()"></div>
-      <div class="field"><label>Produto</label><input id="opProduto" placeholder="🔎 Buscar produto" oninput="renderTables()"></div>
+      <div class="field"><label>Produto</label><input id="opProduto" list="productList" placeholder="🔎 Buscar produto" oninput="renderTables()"></div>
+      <div class="field"><label>Classificar por</label><select id="opSort" onchange="renderTables()"><option value="data">Data</option><option value="valor">Valor Final</option><option value="os">OS</option><option value="rota">Rota</option><option value="cliente">Cliente</option><option value="produto">Produto</option></select></div>
+      <div class="field"><label>Ordem</label><select id="opOrder" onchange="renderTables()"><option value="desc">Decrescente / Z → A</option><option value="asc">Crescente / A → Z</option></select></div>
       <button class="action" onclick="clearOpTable()">Limpar</button>
     </div>
     <div class="metric-row" id="opCounters"></div>
@@ -286,7 +297,7 @@ tr:hover td{background:#fffdf0}
 </div>
 
 <script>
-const VERSION = 'Rotas v1.0.2';
+const VERSION = 'Rotas v1.0.3';
 const CSV_URL = 'https://carlosmagnokill-svg.github.io/analisesmatias/SMART%20BD%20ROTAS%20-%20%C3%81LBUNS.csv';
 const PASS_HASH = '4a834ff5afc36d3d462e596c6ba97a7611be397c7c9e18db3dab71458cc45eda';
 const EXPECTED = ['Ordem Serviço','Data','ROTA','Cliente','Produto','Valor Final'];
@@ -378,9 +389,48 @@ function updateDateHeader(){
 }
 function populateLists(){
   const fill=(id,arr)=>{qs(id).innerHTML=[...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(x=>`<option value="${String(x).replaceAll('"','&quot;')}"></option>`).join('')};
-  fill('routeList',rawData.map(r=>r.route));
-  fill('clientList',rawData.map(r=>r.client));
-  fill('productList',rawData.map(r=>r.product));
+  window.__rotasRoutes=[...new Set(rawData.map(r=>r.route).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  window.__rotasClients=[...new Set(rawData.map(r=>r.client).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  window.__rotasProducts=[...new Set(rawData.map(r=>r.product).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  fill('routeList',window.__rotasRoutes);
+  fill('clientList',window.__rotasClients);
+  fill('productList',window.__rotasProducts);
+  setupTableAutocompletes();
+}
+function setupAutocomplete(inputId, sourceFn, onSelect){
+  const input=qs(inputId);
+  if(!input || input.dataset.acReady==='1') return;
+  input.dataset.acReady='1';
+  const box=document.createElement('div');
+  box.className='ac-list';
+  input.parentNode.appendChild(box);
+  function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function show(){
+    const q=norm(input.value);
+    const src=sourceFn();
+    const items=src.filter(x=>!q || norm(x).includes(q)).slice(0,80);
+    if(!items.length){box.style.display='none';return}
+    box.innerHTML=items.map(x=>`<div class="ac-item" data-val="${esc(x)}">${esc(x)}</div>`).join('');
+    box.style.display='block';
+    [...box.querySelectorAll('.ac-item')].forEach(el=>{
+      el.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        input.value=el.getAttribute('data-val');
+        box.style.display='none';
+        if(onSelect) onSelect();
+      });
+    });
+  }
+  input.addEventListener('focus',show);
+  input.addEventListener('input',show);
+  document.addEventListener('mousedown',e=>{if(!input.parentNode.contains(e.target)) box.style.display='none'});
+}
+function setupTableAutocompletes(){
+  setupAutocomplete('clientesRotaSearch',()=>window.__rotasClients||[],renderTables);
+  setupAutocomplete('clientesRotaRoute',()=>window.__rotasRoutes||[],renderTables);
+  setupAutocomplete('opCliente',()=>window.__rotasClients||[],renderTables);
+  setupAutocomplete('opRota',()=>window.__rotasRoutes||[],renderTables);
+  setupAutocomplete('opProduto',()=>window.__rotasProducts||[],renderTables);
 }
 function getFiltered(){
   let data=[...rawData];
@@ -617,7 +667,8 @@ function renderTables(){
   if(oc) opData=opData.filter(x=>x.clientKey.includes(oc));
   if(or) opData=opData.filter(x=>x.routeKey.includes(or));
   if(op) opData=opData.filter(x=>x.productKey.includes(op));
-  opData.sort((a,b)=>b.date-a.date);
+  const opSortField = {data:'date',valor:'value',os:'os',rota:'route',cliente:'client',produto:'product'}[qs('opSort')?.value || 'data'] || 'date';
+  sortRows(opData,opSortField,qs('opOrder')?.value || 'desc');
   qs('opCounters').innerHTML=[
     mini('📄 Registros',nf(opData.length)),
     mini('💰 Subtotal',money(sum(opData,x=>x.value))),
@@ -636,6 +687,8 @@ function clearClientRouteTable(){
 function clearOpTable(){
   ['opOs','opCliente','opRota','opProduto','opStart','opEnd','opValorMin'].forEach(id=>qs(id).value='');
   qs('opPeriod').value='all';
+  if(qs('opSort')) qs('opSort').value='data';
+  if(qs('opOrder')) qs('opOrder').value='desc';
   renderTables();
 }
 
